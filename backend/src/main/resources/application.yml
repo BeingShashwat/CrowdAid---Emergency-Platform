@@ -1,0 +1,46 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: crowdaid-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/crowdaid}
+    username: ${DB_USERNAME:crowdaid_user}
+    password: ${DB_PASSWORD:crowdaid_password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-to-a-very-long-random-secret-key-at-least-32-chars}
+    access-expiration-minutes: ${JWT_ACCESS_EXPIRATION_MINUTES:15}
+    refresh-expiration-days: ${JWT_REFRESH_EXPIRATION_DAYS:14}
+  twilio:
+    enabled: ${TWILIO_ENABLED:false}
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    from-number: ${TWILIO_FROM_NUMBER:}
+    otp-template: ${TWILIO_OTP_TEMPLATE:Your CrowdAid OTP is %s. It expires in 10 minutes.}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173}
+  bootstrap:
+    admin:
+      email: ${ADMIN_EMAIL:admin@crowdaid.local}
+      password: ${ADMIN_PASSWORD:change-this-admin-password}
+      first-name: ${ADMIN_FIRST_NAME:Platform}
+      last-name: ${ADMIN_LAST_NAME:Admin}
+      phone: ${ADMIN_PHONE:+919000000000}
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN

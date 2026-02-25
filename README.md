@@ -1,76 +1,63 @@
-# CrowdAid Full Stack
+# CrowdAid Platform
 
-This workspace now contains:
+Full-stack emergency response platform:
+- `src/` -> React frontend
+- `backend/` -> Spring Boot API
+- `docs/LLD.md` -> simplified low-level design
 
-- `frontend` (root React + Vite app)
-- `backend/` (Spring Boot + PostgreSQL API)
+## Local Run
 
-## Prerequisites
-
-- Node.js 18+
-- Java 21
-- PostgreSQL 16+ (or Docker Desktop to run Postgres container)
-
-## Frontend Setup
-
-From project root:
-
+### 1. Frontend
 ```powershell
 npm install
 Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Frontend runs on `http://localhost:3000` and proxies `/api` to `http://localhost:8080`.
-
-## Backend Setup (Spring Boot + PostgreSQL)
-
-See full backend guide: `backend/README.md`
-
-Quick commands:
-
+### 2. Backend
 ```powershell
 cd backend
 .\scripts\run-backend.ps1
 ```
 
-Before running backend, make sure PostgreSQL is available and env vars are set:
+## Public Deployment (Recommended)
 
-- `DB_URL` (default: `jdbc:postgresql://localhost:5432/crowdaid`)
-- `DB_USERNAME` (default: `crowdaid_user`)
-- `DB_PASSWORD` (default: `crowdaid_password`)
-- `JWT_SECRET` (must be 32+ chars)
-- `JWT_ACCESS_EXPIRATION_MINUTES` (default: `15`)
-- `JWT_REFRESH_EXPIRATION_DAYS` (default: `14`)
-- `TWILIO_ENABLED`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` (for real OTP SMS)
+### Architecture
+- Frontend: Vercel / Netlify
+- Backend: Render / Railway / Fly.io
+- Database: Supabase PostgreSQL
 
-Flyway migrations are included and run automatically on startup.
+### Supabase DB
+Use Supabase Postgres connection details in backend env:
+- `DB_URL=jdbc:postgresql://<pooler-host>:6543/postgres?sslmode=require`
+- `DB_USERNAME=postgres.<project_ref>`
+- `DB_PASSWORD=<db_password>`
 
-## Implemented Backend APIs
+### Backend (production)
+Set:
+- `SPRING_PROFILES_ACTIVE=prod`
+- `JWT_SECRET` (32+ chars, strong random)
+- `CORS_ALLOWED_ORIGINS=https://<your-frontend-domain>`
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_PHONE`
+- optional Twilio: `TWILIO_ENABLED=true`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
 
-- `POST /api/auth/login`
-- `POST /api/auth/register/request-otp`
-- `POST /api/auth/register/verify-otp`
-- `POST /api/auth/register`
-- `POST /api/auth/logout`
-- `POST /api/auth/refresh`
-- `POST /api/auth/logout-all`
-- `GET /api/auth/me`
-- `GET /api/auth/sessions`
-- `DELETE /api/auth/me`
-- `POST /api/emergencies/sos`
-- `GET /api/emergencies/nearby`
-- `GET /api/emergencies`
-- `POST /api/emergencies/{id}/respond`
-- `POST /api/emergencies/{id}/resolve`
-- `POST /api/emergencies/{id}/cancel`
-- `GET /api/emergencies/my`
-- `POST /api/emergencies/{id}/thank`
-- `GET /api/emergencies/export`
-- `GET /api/volunteers/me/stats`
-- `GET /api/volunteers/me/activity`
-- `PATCH /api/volunteers/me/status`
-- `GET /api/volunteers/leaderboard`
-- `GET /api/admin/stats`
-- `GET /api/location/reverse-geocode`
-"# CrowdAid---Emergency-Platform" 
+### Frontend (production)
+Set:
+- `VITE_API_BASE_URL=https://<your-backend-domain>/api`
+
+## GitHub Publish
+
+This repo is ready to push. `node_modules`, build outputs, and local env files are ignored.
+
+```powershell
+git add .
+git commit -m "Production-ready CrowdAid with Supabase deployment support"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<your-repo>.git
+git push -u origin main
+```
+
+## Security Notes
+- Never commit `.env.local`, backend `.env`, Twilio keys, JWT secrets.
+- Rotate any API key that was ever shared in chat/logs.
+- Run backend only with `prod` profile in public deployment.
